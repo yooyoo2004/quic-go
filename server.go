@@ -390,7 +390,7 @@ func (s *baseServer) handleInitialImpl(p *receivedPacket, hdr *wire.Header) (qui
 	if err != nil {
 		return nil, err
 	}
-	s.logger.Debugf("Changing connection ID to %s.", connID)
+	s.logger.Debugf("Changing connection ID to %s. Received dest %s, src %s.", connID, hdr.DestConnectionID, hdr.SrcConnectionID)
 	sess := s.createNewSession(
 		p.remoteAddr,
 		origDestConnectionID,

@@ -767,6 +767,7 @@ func (s *session) handleSinglePacket(p *receivedPacket, hdr *wire.Header) bool /
 	}
 
 	packet, err := s.unpacker.Unpack(hdr, p.rcvTime, p.data)
+	fmt.Println(err)
 	if err != nil {
 		switch err {
 		case handshake.ErrKeysDropped:
