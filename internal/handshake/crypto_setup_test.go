@@ -254,8 +254,6 @@ var _ = Describe("Crypto Setup TLS", func() {
 	})
 
 	Context("doing the handshake", func() {
-		var testDone chan struct{}
-
 		generateCert := func() tls.Certificate {
 			priv, err := rsa.GenerateKey(rand.Reader, 2048)
 			Expect(err).ToNot(HaveOccurred())
@@ -275,14 +273,6 @@ var _ = Describe("Crypto Setup TLS", func() {
 			}
 		}
 
-		BeforeEach(func() {
-			testDone = make(chan struct{})
-		})
-
-		AfterEach(func() {
-			close(testDone)
-		})
-
 		handshake := func(client CryptoSetup, cChunkChan <-chan chunk,
 			server CryptoSetup, sChunkChan <-chan chunk) {
 			done := make(chan struct{})
@@ -294,7 +284,7 @@ var _ = Describe("Crypto Setup TLS", func() {
 						server.HandleMessage(c.data, c.encLevel)
 					case c := <-sChunkChan:
 						client.HandleMessage(c.data, c.encLevel)
-					case <-testDone: // handshake complete
+					case <-done: // handshake complete
 						return
 					}
 				}
@@ -302,13 +292,13 @@ var _ = Describe("Crypto Setup TLS", func() {
 
 			go func() {
 				defer GinkgoRecover()
+				defer close(done)
 				server.RunHandshake()
 				ticket, err := server.GetSessionTicket()
 				Expect(err).ToNot(HaveOccurred())
 				if ticket != nil {
 					client.HandleMessage(ticket, protocol.Encryption1RTT)
 				}
-				close(done)
 			}()
 
 			client.RunHandshake()
