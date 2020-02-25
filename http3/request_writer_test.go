@@ -70,6 +70,8 @@ var _ = Describe("Request Writer", func() {
 		req, err := http.NewRequest("POST", "https://quic.clemente.io/upload.html", postData)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(rw.WriteRequest(str, req, false)).To(Succeed())
+		Eventually(closed).Should(BeClosed())
+
 		headerFields := decode(strBuf)
 		Expect(headerFields).To(HaveKeyWithValue(":method", "POST"))
 		Expect(headerFields).To(HaveKey("content-length"))
@@ -77,7 +79,6 @@ var _ = Describe("Request Writer", func() {
 		Expect(err).ToNot(HaveOccurred())
 		Expect(contentLength).To(BeNumerically(">", 0))
 
-		Eventually(closed).Should(BeClosed())
 		frame, err := parseNextFrame(strBuf)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(frame).To(BeAssignableToTypeOf(&dataFrame{}))
