@@ -84,11 +84,7 @@ var _ = Describe("TLS Extension Handler, for the server", func() {
 			})
 
 			It("ignores extensions that are not sent with the ClientHello", func() {
-				go func() {
-					defer GinkgoRecover()
-					handlerServer.ReceivedExtensions(uint8(typeFinished), chExts)
-				}()
-
+				handlerServer.ReceivedExtensions(uint8(typeFinished), chExts)
 				Consistently(handlerServer.TransportParameters()).ShouldNot(Receive())
 			})
 		})
